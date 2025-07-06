@@ -1,0 +1,90 @@
+-----------------------------------------------------------------------------------------------------------
+1. USRP Source (uhd_usrp_source_0)
+-----------------------------------------------------------------------------------------------------------
+Purpose: Captures I/Q samples from the SDR hardware.
+
+Key settings:
+
+Sample rate: 2.4 MHz
+Center frequency: Tunable (default is 93.3 MHz)
+Bandwidth: 2 MHz
+Antenna: TX/RX
+AGC: Enabled
+
+Output: Complex stream representing the received signal.
+
+-----------------------------------------------------------------------------------------------------------
+2. Low Pass Filter 
+-----------------------------------------------------------------------------------------------------------
+Purpose: Filters out unwanted frequencies to isolate the FM broadcast signal.
+
+Settings:
+Cutoff frequency: 50 kHz
+Transition width: 2.5 kHz
+Decimation: 8 (downsamples to 300 kHz)
+
+Output: Cleaned and downsampled complex signal.
+
+-----------------------------------------------------------------------------------------------------------
+3. Quadrature Demodulator
+-----------------------------------------------------------------------------------------------------------
+Purpose: Demodulates the FM signal, converting frequency changes into audio amplitude.
+
+Gain formula:
+gain = sample_rate / (2 * pi * fsk_deviation_hz)
+     = 300000 / (2 * pi * 75000)
+
+*Note*: sample_rate is not the global samp_rate variable, it is the downsampled sample rate of 300000
+     
+Input: Complex baseband signal
+Output: Real-valued mono audio stream
+
+-----------------------------------------------------------------------------------------------------------
+4. Rational Resampler (rational_resampler_xxx_0)
+-----------------------------------------------------------------------------------------------------------
+Purpose: Converts the demodulated audio from 300 kHz to 48 kHz for audio output.
+
+Settings:
+Interpolation: 48000
+Decimation: 300000
+
+Input/Output: Float stream
+
+-----------------------------------------------------------------------------------------------------------
+5. Multiply Const (blocks_multiply_const_vxx_0)
+-----------------------------------------------------------------------------------------------------------
+Purpose: Controls volume by multiplying the audio signal.
+
+Controlled by: GUI volume dial
+Range: 0 to 1.4
+
+-----------------------------------------------------------------------------------------------------------
+6. Audio Sink (audio_sink_0)
+-----------------------------------------------------------------------------------------------------------
+Purpose: Plays the audio signal through system speakers.
+
+Settings:
+Sample rate: 48 kHz
+
+Output device: Default system audio
+
+-----------------------------------------------------------------------------------------------------------
+7. QT GUI Frequency Sink (qtgui_freq_sink_x_0)
+-----------------------------------------------------------------------------------------------------------
+Purpose: Displays the real-time FFT (spectrum) of the filtered FM signal.
+
+Input: Complex signal after filtering
+Bandwidth: Matches sampling rate
+GUI: Embedded in main window
+
+-----------------------------------------------------------------------------------------------------------
+8. GUI Range Widgets
+-----------------------------------------------------------------------------------------------------------
+Channel Knob : Tunes frequency from 88 MHz to 108 MHz
+
+Volume Dial : Adjusts volume multiplier
+
+-----------------------------------------------------------------------------------------------------------
+9. Frequency Label (freq_label)
+-----------------------------------------------------------------------------------------------------------
+Displays the currently tuned frequency in MHz using a toolbar widget. Updates dynamically as you change the tuning knob.
